@@ -22,7 +22,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated Red Grid Background */
         .grid-bg {
             position: fixed;
             top: 0;
@@ -42,7 +41,6 @@
             100% { transform: translate(50px, 50px); }
         }
 
-        /* Red Particles */
         .particles {
             position: fixed;
             top: 0;
@@ -75,7 +73,6 @@
             z-index: 1;
         }
 
-        /* Login Panel - Red Theme */
         .login-wrapper {
             display: flex;
             justify-content: center;
@@ -118,12 +115,10 @@
             margin-bottom: 32px;
         }
 
-        /* Dashboard */
         .dashboard {
             display: none;
         }
 
-        /* Header - Red Theme */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -156,7 +151,6 @@
             margin-top: 4px;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -198,7 +192,6 @@
             margin-top: 8px;
         }
 
-        /* Charts */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -227,7 +220,6 @@
             max-height: 250px;
         }
 
-        /* Tabs - Red Theme */
         .tabs-container {
             display: flex;
             gap: 12px;
@@ -265,7 +257,6 @@
             box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
         }
 
-        /* Panels */
         .tab-panel {
             display: none;
             animation: fadeIn 0.3s ease;
@@ -280,7 +271,6 @@
             to { opacity: 1; }
         }
 
-        /* Forms - Red Theme */
         .form-card {
             background: rgba(10, 10, 10, 0.7);
             backdrop-filter: blur(8px);
@@ -344,7 +334,6 @@
             color: rgba(255,255,255,0.4);
         }
 
-        /* Buttons - Red Theme */
         .btn {
             padding: 12px 28px;
             border: none;
@@ -394,7 +383,6 @@
             font-size: 12px;
         }
 
-        /* Lists */
         .list-container {
             max-height: 500px;
             overflow-y: auto;
@@ -426,6 +414,8 @@
         .badge-banned { background: rgba(255, 0, 0, 0.2); color: #ff0000; }
         .badge-admin { background: rgba(255, 0, 0, 0.2); color: #ff0000; border: 1px solid rgba(255,0,0,0.3); }
         .badge-user { background: rgba(255, 255, 255, 0.1); color: #ccc; }
+        .badge-no-lock { background: rgba(0, 229, 255, 0.2); color: #00e5ff; border: 1px solid rgba(0,229,255,0.3); }
+        .badge-auto-lock { background: rgba(255, 170, 51, 0.2); color: #ffaa33; border: 1px solid rgba(255,170,51,0.3); }
 
         .key-value {
             font-family: 'Monaco', monospace;
@@ -434,7 +424,6 @@
             color: #ff0000;
         }
 
-        /* Alert */
         .alert {
             padding: 12px 20px;
             border-radius: 20px;
@@ -460,7 +449,6 @@
             color: rgba(255,255,255,0.8);
         }
 
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -480,7 +468,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* Loading Overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -509,7 +496,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .container { padding: 16px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -529,7 +515,7 @@
         <div id="loginPanel" class="login-wrapper">
             <div class="login-card">
                 <div class="logo">✦ NEXUS</div>
-                <div class="logo-sub">ADMIN CONTROL PANEL v3.0</div>
+                <div class="logo-sub">ADMIN CONTROL PANEL v7.0</div>
                 <div class="input-group" style="margin-bottom: 16px;">
                     <input type="text" id="adminUser" placeholder="Username" value="admin">
                 </div>
@@ -612,9 +598,20 @@
                     </div>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label><i class="fas fa-lock"></i> Lock to IP (Optional)</label>
-                            <input type="text" id="lockIp" placeholder="Leave empty for auto-lock on first use">
-                            <small>Specific IP address or leave empty to auto-lock when first used</small>
+                            <label><i class="fas fa-lock"></i> IP Lock Option</label>
+                            <select id="ipLockOption">
+                                <option value="auto">🔓 Auto Lock (lock to first IP that uses it)</option>
+                                <option value="none">🌍 No Lock (any IP can use - unlimited)</option>
+                                <option value="custom">🔒 Custom IP Lock (specific IP only)</option>
+                            </select>
+                            <small>Choose how this key should be locked</small>
+                        </div>
+                    </div>
+                    <div class="form-grid" id="customIpGroup" style="display: none;">
+                        <div class="input-group">
+                            <label><i class="fas fa-network-wired"></i> Custom IP Address</label>
+                            <input type="text" id="customIp" placeholder="192.168.1.1">
+                            <small>Enter specific IP address to lock this key</small>
                         </div>
                     </div>
                     <button class="btn btn-primary" onclick="addKey()"><i class="fas fa-magic"></i> Create Key</button>
@@ -652,9 +649,18 @@
                     </div>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label><i class="fas fa-lock"></i> Lock to IP (Optional)</label>
-                            <input type="text" id="bulkLockIp" placeholder="Leave empty for auto-lock">
-                            <small>All keys will be locked to this IP (or auto-lock if empty)</small>
+                            <label><i class="fas fa-lock"></i> IP Lock Option</label>
+                            <select id="bulkIpLockOption">
+                                <option value="auto">🔓 Auto Lock (lock to first IP)</option>
+                                <option value="none">🌍 No Lock (any IP - unlimited)</option>
+                                <option value="custom">🔒 Custom IP Lock (specific IP)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid" id="bulkCustomIpGroup" style="display: none;">
+                        <div class="input-group">
+                            <label><i class="fas fa-network-wired"></i> Custom IP Address</label>
+                            <input type="text" id="bulkCustomIp" placeholder="192.168.1.1">
                         </div>
                     </div>
                     <button class="btn btn-primary" onclick="bulkKeys()"><i class="fas fa-cogs"></i> Generate Bulk Keys</button>
@@ -753,6 +759,22 @@
         let statusChart = null;
         let activityChart = null;
         const BASE_API = "https://system-nexus-key.vercel.app";
+
+        // Toggle custom IP input for add key
+        document.getElementById('ipLockOption')?.addEventListener('change', function() {
+            const customGroup = document.getElementById('customIpGroup');
+            if (customGroup) {
+                customGroup.style.display = this.value === 'custom' ? 'flex' : 'none';
+            }
+        });
+
+        // Toggle custom IP input for bulk keys
+        document.getElementById('bulkIpLockOption')?.addEventListener('change', function() {
+            const customGroup = document.getElementById('bulkCustomIpGroup');
+            if (customGroup) {
+                customGroup.style.display = this.value === 'custom' ? 'flex' : 'none';
+            }
+        });
 
         function showLoading(show) {
             const overlay = document.getElementById('loadingOverlay');
@@ -969,7 +991,20 @@
                     } else {
                         container.innerHTML = data.keys.map(k => {
                             const isAdminKey = k.is_admin_key === 1;
-                            const lockStatus = k.locked_ip ? `Locked to: ${k.locked_ip}` : '🔓 Auto-lock on first use';
+                            let lockStatus = '';
+                            let lockBadgeClass = '';
+                            
+                            if (!k.locked_ip) {
+                                lockStatus = '🔓 Auto-lock on first use';
+                                lockBadgeClass = 'badge-auto-lock';
+                            } else if (k.locked_ip === '0.0.0.0') {
+                                lockStatus = '🌍 No IP Lock (any IP)';
+                                lockBadgeClass = 'badge-no-lock';
+                            } else {
+                                lockStatus = `🔒 Locked to IP: ${k.locked_ip}`;
+                                lockBadgeClass = 'badge-admin';
+                            }
+                            
                             return `
                                 <div class="list-item">
                                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
@@ -977,13 +1012,13 @@
                                         <div style="display: flex; gap: 8px;">
                                             <span class="badge ${k.status === 'active' ? 'badge-active' : 'badge-expired'}">${k.status}</span>
                                             <span class="badge ${isAdminKey ? 'badge-admin' : 'badge-user'}">${isAdminKey ? 'ADMIN KEY' : 'USER KEY'}</span>
+                                            <span class="badge ${lockBadgeClass}">${lockStatus.substring(0, 30)}${lockStatus.length > 30 ? '...' : ''}</span>
                                         </div>
                                     </div>
                                     <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: rgba(255,255,255,0.5);">
                                         <span><i class="fas fa-user"></i> User: ${k.user_id}</span>
                                         <span><i class="fas fa-hourglass"></i> Duration: ${k.duration_hours}h</span>
                                         <span><i class="fas fa-calendar"></i> Expires: ${new Date(k.expiry_ms).toLocaleString()}</span>
-                                        <span><i class="fas fa-lock"></i> IP Lock: ${lockStatus}</span>
                                     </div>
                                     <button class="btn btn-sm btn-danger" onclick="deleteKey('${k.key_text}')" style="margin-top: 12px;"><i class="fas fa-trash"></i> Delete</button>
                                 </div>
@@ -1125,7 +1160,18 @@
             const hours = parseInt(document.getElementById('hours')?.value) || 0;
             const minutes = parseInt(document.getElementById('minutes')?.value) || 0;
             const keyText = document.getElementById('customKey')?.value;
-            const lockToIp = document.getElementById('lockIp')?.value || null;
+            const ipLockOption = document.getElementById('ipLockOption')?.value;
+            const customIp = document.getElementById('customIp')?.value;
+            
+            let lockToIp = null;
+            
+            if (ipLockOption === 'custom' && customIp) {
+                lockToIp = customIp;
+            } else if (ipLockOption === 'none') {
+                lockToIp = '0.0.0.0';
+            } else if (ipLockOption === 'auto') {
+                lockToIp = null;
+            }
             
             if (!userId) { showToast('User ID required', 'error'); return; }
             
@@ -1138,11 +1184,18 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    const lockMessage = data.lockedIp === 'auto (first use)' ? 'Will auto-lock on first use' : `Locked to IP: ${data.lockedIp}`;
+                    let lockMessage = '';
+                    if (ipLockOption === 'none') {
+                        lockMessage = '🌍 No IP Lock (any IP can use)';
+                    } else if (ipLockOption === 'custom' && customIp) {
+                        lockMessage = `🔒 Locked to IP: ${customIp}`;
+                    } else {
+                        lockMessage = '🔓 Auto-lock on first use';
+                    }
                     showToast(`Key created: ${data.key}`, 'success');
                     const addMsg = document.getElementById('addMsg');
                     if (addMsg) {
-                        addMsg.innerHTML = `<div class="alert alert-success">✅ Key: ${data.key}<br>📅 Expires: ${data.expiryFormatted}<br>🔒 ${lockMessage}</div>`;
+                        addMsg.innerHTML = `<div class="alert alert-success">✅ Key: ${data.key}<br>📅 Expires: ${data.expiryFormatted}<br>${lockMessage}</div>`;
                     }
                     loadStats(); loadKeys();
                 } else { showToast(data.error, 'error'); }
@@ -1159,7 +1212,18 @@
             const days = parseInt(document.getElementById('bulkDays')?.value) || 0;
             const hours = parseInt(document.getElementById('bulkHours')?.value) || 0;
             const minutes = parseInt(document.getElementById('bulkMinutes')?.value) || 0;
-            const lockToIp = document.getElementById('bulkLockIp')?.value || null;
+            const ipLockOption = document.getElementById('bulkIpLockOption')?.value;
+            const customIp = document.getElementById('bulkCustomIp')?.value;
+            
+            let lockToIp = null;
+            
+            if (ipLockOption === 'custom' && customIp) {
+                lockToIp = customIp;
+            } else if (ipLockOption === 'none') {
+                lockToIp = '0.0.0.0';
+            } else if (ipLockOption === 'auto') {
+                lockToIp = null;
+            }
             
             if (!userId) { showToast('User ID required', 'error'); return; }
             if (count > 100) { showToast('Max 100 keys at once', 'error'); return; }
@@ -1173,11 +1237,18 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    const lockMessage = data.lockedIp === 'auto (first use)' ? 'Will auto-lock on first use' : `Locked to IP: ${data.lockedIp}`;
+                    let lockMessage = '';
+                    if (ipLockOption === 'none') {
+                        lockMessage = '🌍 No IP Lock (any IP can use)';
+                    } else if (ipLockOption === 'custom' && customIp) {
+                        lockMessage = `🔒 Locked to IP: ${customIp}`;
+                    } else {
+                        lockMessage = '🔓 Auto-lock on first use';
+                    }
                     showToast(`Generated ${data.count} keys`, 'success');
                     const bulkMsg = document.getElementById('bulkMsg');
                     const bulkResult = document.getElementById('bulkResult');
-                    if (bulkMsg) bulkMsg.innerHTML = `<div class="alert alert-success">✅ Generated ${data.count} keys for ${userId}<br>🔒 ${lockMessage}</div>`;
+                    if (bulkMsg) bulkMsg.innerHTML = `<div class="alert alert-success">✅ Generated ${data.count} keys for ${userId}<br>${lockMessage}</div>`;
                     if (bulkResult) bulkResult.innerHTML = `<div class="form-card"><h4>Generated Keys:</h4>${data.keys.map(k => `<div class="key-value"><i class="fas fa-key"></i> ${k}</div>`).join('')}<div style="margin-top:12px;">📅 All expire at: ${data.expiryFormatted}</div></div>`;
                     loadStats(); loadKeys();
                 } else { showToast(data.error, 'error'); }
