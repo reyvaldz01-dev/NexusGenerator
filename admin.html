@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NEXUS ADMIN | Ultimate Control Panel</title>
+    <title>NEXUS ADMIN | Control Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -509,22 +509,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Device Usage Bar */
-        .device-bar {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            height: 6px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .device-bar-fill {
-            background: linear-gradient(90deg, #ff0000, #ff4444);
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .container { padding: 16px; }
@@ -545,7 +529,7 @@
         <div id="loginPanel" class="login-wrapper">
             <div class="login-card">
                 <div class="logo">✦ NEXUS</div>
-                <div class="logo-sub">ADMIN CONTROL PANEL v5.0</div>
+                <div class="logo-sub">ADMIN CONTROL PANEL v3.0</div>
                 <div class="input-group" style="margin-bottom: 16px;">
                     <input type="text" id="adminUser" placeholder="Username" value="admin">
                 </div>
@@ -565,7 +549,7 @@
             <div class="dashboard-header">
                 <div class="header-title">
                     <h1><span>✦ NEXUS</span> ADMIN PANEL</h1>
-                    <p><i class="fas fa-shield-alt"></i> Ultimate Key Management System</p>
+                    <p><i class="fas fa-shield-alt"></i>Key Management</p>
                 </div>
                 <div style="display: flex; gap: 12px;">
                     <button class="btn btn-outline" onclick="exportData()"><i class="fas fa-download"></i> Export Data</button>
@@ -628,9 +612,9 @@
                     </div>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label><i class="fas fa-mobile-alt"></i> Max Devices</label>
-                            <input type="number" id="maxDevices" value="999" min="1" max="999">
-                            <small>1 = single device only | 999 = unlimited devices</small>
+                            <label><i class="fas fa-lock"></i> Lock to IP (Optional)</label>
+                            <input type="text" id="lockIp" placeholder="Leave empty for auto-lock on first use">
+                            <small>Specific IP address or leave empty to auto-lock when first used</small>
                         </div>
                     </div>
                     <button class="btn btn-primary" onclick="addKey()"><i class="fas fa-magic"></i> Create Key</button>
@@ -668,9 +652,9 @@
                     </div>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label><i class="fas fa-mobile-alt"></i> Max Devices (per key)</label>
-                            <input type="number" id="bulkMaxDevices" value="999" min="1" max="999">
-                            <small>1 = single device | 999 = unlimited</small>
+                            <label><i class="fas fa-lock"></i> Lock to IP (Optional)</label>
+                            <input type="text" id="bulkLockIp" placeholder="Leave empty for auto-lock">
+                            <small>All keys will be locked to this IP (or auto-lock if empty)</small>
                         </div>
                     </div>
                     <button class="btn btn-primary" onclick="bulkKeys()"><i class="fas fa-cogs"></i> Generate Bulk Keys</button>
@@ -730,10 +714,10 @@
                     <div class="section-title"><i class="fas fa-sliders-h"></i> System Configuration</div>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label><i class="fas fa-lock"></i> Device Lock Enabled</label>
-                            <select id="settingDeviceLock">
-                                <option value="true">Yes (Keys locked to devices)</option>
-                                <option value="false">No (Any device can use)</option>
+                            <label><i class="fas fa-lock"></i> IP Lock Enabled</label>
+                            <select id="settingIpLock">
+                                <option value="true">Yes (Keys locked to IP)</option>
+                                <option value="false">No (Any IP can use)</option>
                             </select>
                         </div>
                         <div class="input-group">
@@ -984,30 +968,23 @@
                         container.innerHTML = '<div class="alert alert-info">No keys found</div>';
                     } else {
                         container.innerHTML = data.keys.map(k => {
-                            const maxDev = k.max_devices || 1;
-                            const currentDev = k.current_devices || 0;
-                            const percent = (currentDev / maxDev) * 100;
-                            const deviceStatus = maxDev >= 999 ? 'Unlimited' : `${currentDev}/${maxDev}`;
+                            const isAdminKey = k.is_admin_key === 1;
+                            const lockStatus = k.locked_ip ? `Locked to: ${k.locked_ip}` : '🔓 Auto-lock on first use';
                             return `
                                 <div class="list-item">
                                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                                         <div><span class="key-value"><i class="fas fa-key"></i> ${k.key_text}</span></div>
                                         <div style="display: flex; gap: 8px;">
                                             <span class="badge ${k.status === 'active' ? 'badge-active' : 'badge-expired'}">${k.status}</span>
-                                            <span class="badge ${k.is_admin_key === 1 ? 'badge-admin' : 'badge-user'}">${k.is_admin_key === 1 ? 'ADMIN KEY' : 'USER KEY'}</span>
+                                            <span class="badge ${isAdminKey ? 'badge-admin' : 'badge-user'}">${isAdminKey ? 'ADMIN KEY' : 'USER KEY'}</span>
                                         </div>
                                     </div>
                                     <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: rgba(255,255,255,0.5);">
                                         <span><i class="fas fa-user"></i> User: ${k.user_id}</span>
                                         <span><i class="fas fa-hourglass"></i> Duration: ${k.duration_hours}h</span>
                                         <span><i class="fas fa-calendar"></i> Expires: ${new Date(k.expiry_ms).toLocaleString()}</span>
-                                        <span><i class="fas fa-mobile-alt"></i> Devices: ${deviceStatus}</span>
+                                        <span><i class="fas fa-lock"></i> IP Lock: ${lockStatus}</span>
                                     </div>
-                                    ${maxDev < 999 ? `
-                                        <div class="device-bar">
-                                            <div class="device-bar-fill" style="width: ${percent}%;"></div>
-                                        </div>
-                                    ` : ''}
                                     <button class="btn btn-sm btn-danger" onclick="deleteKey('${k.key_text}')" style="margin-top: 12px;"><i class="fas fa-trash"></i> Delete</button>
                                 </div>
                             `;
@@ -1043,6 +1020,7 @@
                                     <span><i class="fas fa-phone"></i> Phone: ${u.phone || 'N/A'}</span>
                                     <span><i class="fas fa-key"></i> Keys: ${u.keys_generated || 0}</span>
                                     <span><i class="fas fa-calendar"></i> Registered: ${new Date(u.created_at).toLocaleString()}</span>
+                                    <span><i class="fas fa-network-wired"></i> IP: ${u.ip_address || 'Not recorded'}</span>
                                 </div>
                                 <div style="margin-top: 12px;">
                                     ${u.banned === 1 ? 
@@ -1100,11 +1078,11 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    const deviceLockSelect = document.getElementById('settingDeviceLock');
+                    const ipLockSelect = document.getElementById('settingIpLock');
                     const maxKeysInput = document.getElementById('settingMaxKeysPerUser');
                     const cooldownInput = document.getElementById('settingCooldown');
                     const defaultDurationInput = document.getElementById('settingDefaultDuration');
-                    if (deviceLockSelect) deviceLockSelect.value = data.settings.device_lock_enabled || 'true';
+                    if (ipLockSelect) ipLockSelect.value = data.settings.ip_lock_enabled || 'true';
                     if (maxKeysInput) maxKeysInput.value = data.settings.max_keys_per_user || '5';
                     if (cooldownInput) cooldownInput.value = data.settings.cooldown_minutes || '1';
                     if (defaultDurationInput) defaultDurationInput.value = data.settings.default_duration_hours || '3';
@@ -1117,7 +1095,7 @@
         async function saveSettings() {
             showLoading(true);
             const settings = {
-                device_lock_enabled: document.getElementById('settingDeviceLock')?.value || 'true',
+                ip_lock_enabled: document.getElementById('settingIpLock')?.value || 'true',
                 max_keys_per_user: document.getElementById('settingMaxKeysPerUser')?.value || '5',
                 cooldown_minutes: document.getElementById('settingCooldown')?.value || '1',
                 default_duration_hours: document.getElementById('settingDefaultDuration')?.value || '3'
@@ -1147,21 +1125,25 @@
             const hours = parseInt(document.getElementById('hours')?.value) || 0;
             const minutes = parseInt(document.getElementById('minutes')?.value) || 0;
             const keyText = document.getElementById('customKey')?.value;
-            const maxDevices = parseInt(document.getElementById('maxDevices')?.value) || 999;
+            const lockToIp = document.getElementById('lockIp')?.value || null;
+            
             if (!userId) { showToast('User ID required', 'error'); return; }
+            
             showLoading(true);
             try {
                 const res = await fetch(`${BASE_API}/api/admin/add-key`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, userId, days, hours, minutes, keyText, maxDevices })
+                    body: JSON.stringify({ token, userId, days, hours, minutes, keyText, lockToIp })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    const deviceMsg = data.maxDevices === 999 ? 'Unlimited devices' : `${data.maxDevices} device(s)`;
+                    const lockMessage = data.lockedIp === 'auto (first use)' ? 'Will auto-lock on first use' : `Locked to IP: ${data.lockedIp}`;
                     showToast(`Key created: ${data.key}`, 'success');
                     const addMsg = document.getElementById('addMsg');
-                    if (addMsg) addMsg.innerHTML = `<div class="alert alert-success">✅ Key: ${data.key}<br>📅 Expires: ${data.expiryFormatted}<br>📱 Max Devices: ${deviceMsg}</div>`;
+                    if (addMsg) {
+                        addMsg.innerHTML = `<div class="alert alert-success">✅ Key: ${data.key}<br>📅 Expires: ${data.expiryFormatted}<br>🔒 ${lockMessage}</div>`;
+                    }
                     loadStats(); loadKeys();
                 } else { showToast(data.error, 'error'); }
             } catch (err) {
@@ -1177,23 +1159,25 @@
             const days = parseInt(document.getElementById('bulkDays')?.value) || 0;
             const hours = parseInt(document.getElementById('bulkHours')?.value) || 0;
             const minutes = parseInt(document.getElementById('bulkMinutes')?.value) || 0;
-            const maxDevices = parseInt(document.getElementById('bulkMaxDevices')?.value) || 999;
+            const lockToIp = document.getElementById('bulkLockIp')?.value || null;
+            
             if (!userId) { showToast('User ID required', 'error'); return; }
             if (count > 100) { showToast('Max 100 keys at once', 'error'); return; }
+            
             showLoading(true);
             try {
                 const res = await fetch(`${BASE_API}/api/admin/add-bulk-keys`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, userId, count, days, hours, minutes, maxDevices })
+                    body: JSON.stringify({ token, userId, count, days, hours, minutes, lockToIp })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    const deviceMsg = data.maxDevices === 999 ? 'Unlimited' : data.maxDevices;
+                    const lockMessage = data.lockedIp === 'auto (first use)' ? 'Will auto-lock on first use' : `Locked to IP: ${data.lockedIp}`;
                     showToast(`Generated ${data.count} keys`, 'success');
                     const bulkMsg = document.getElementById('bulkMsg');
                     const bulkResult = document.getElementById('bulkResult');
-                    if (bulkMsg) bulkMsg.innerHTML = `<div class="alert alert-success">✅ Generated ${data.count} keys for ${userId}<br>📱 Max Devices: ${deviceMsg}</div>`;
+                    if (bulkMsg) bulkMsg.innerHTML = `<div class="alert alert-success">✅ Generated ${data.count} keys for ${userId}<br>🔒 ${lockMessage}</div>`;
                     if (bulkResult) bulkResult.innerHTML = `<div class="form-card"><h4>Generated Keys:</h4>${data.keys.map(k => `<div class="key-value"><i class="fas fa-key"></i> ${k}</div>`).join('')}<div style="margin-top:12px;">📅 All expire at: ${data.expiryFormatted}</div></div>`;
                     loadStats(); loadKeys();
                 } else { showToast(data.error, 'error'); }
@@ -1207,10 +1191,13 @@
         async function deleteKey(key) { if(confirm(`Delete key ${key}?`)){ showLoading(true); await fetch(`${BASE_API}/api/admin/delete-key`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, key}) }); loadKeys(); loadStats(); showToast('Key deleted', 'success'); showLoading(false); } }
         async function deleteExpired() { if(confirm('Delete all expired keys?')){ showLoading(true); await fetch(`${BASE_API}/api/admin/delete-expired-keys`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token}) }); loadKeys(); loadStats(); showToast('Expired keys deleted', 'success'); showLoading(false); } }
         async function deleteAll() { if(confirm('⚠️ DELETE ALL KEYS? This cannot be undone!')){ showLoading(true); await fetch(`${BASE_API}/api/admin/delete-all-keys`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token}) }); loadKeys(); loadStats(); showToast('All keys deleted', 'success'); showLoading(false); } }
+        
         async function banUser(userId) { if(confirm(`Ban user ${userId}?`)){ showLoading(true); await fetch(`${BASE_API}/api/admin/ban-user`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, userId}) }); loadUsers(); loadStats(); showToast(`User ${userId} banned`, 'success'); showLoading(false); } }
         async function unbanUser(userId) { showLoading(true); await fetch(`${BASE_API}/api/admin/unban-user`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, userId}) }); loadUsers(); loadStats(); showToast(`User ${userId} unbanned`, 'success'); showLoading(false); }
+        
         async function banIp() { const ip = document.getElementById('banIp')?.value; const reason = document.getElementById('banReason')?.value; if(!ip){ showToast('IP required', 'error'); return; } showLoading(true); const res = await fetch(`${BASE_API}/api/admin/ban-ip`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, ip, reason}) }); const data = await res.json(); if(data.success){ showToast(`IP ${ip} banned`, 'success'); loadBannedIps(); } else { showToast(data.error, 'error'); } showLoading(false); }
         async function unbanIp(ip) { showLoading(true); await fetch(`${BASE_API}/api/admin/unban-ip`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, ip}) }); loadBannedIps(); showToast(`IP ${ip} unbanned`, 'success'); showLoading(false); }
+        
         function exportData() { showToast('Export feature: Data can be exported from Supabase dashboard', 'info'); }
         
         function switchTab(tab) {
