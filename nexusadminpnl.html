@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NEXUS SERVER | Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at 20% 30%, #0a0a0a, #000000);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 0, 0, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .glow-orb {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,0,0,0.15), transparent);
+            border-radius: 50%;
+            top: -300px;
+            right: -300px;
+            z-index: -1;
+            animation: floatGlow 12s ease-in-out infinite;
+        }
+
+        .glow-orb-2 {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,50,50,0.1), transparent);
+            border-radius: 50%;
+            bottom: -200px;
+            left: -200px;
+            z-index: -1;
+            animation: floatGlow2 15s ease-in-out infinite;
+        }
+
+        @keyframes floatGlow {
+            0%, 100% { transform: translate(0, 0); opacity: 0.5; }
+            50% { transform: translate(-50px, 50px); opacity: 0.8; }
+        }
+
+        @keyframes floatGlow2 {
+            0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+            50% { transform: translate(50px, -50px); opacity: 0.6; }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.4), transparent);
+            border-radius: 50%;
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Login Panel */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: rgba(8, 8, 12, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+            border-radius: 48px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.4);
+            animation: fadeInUp 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff0000, transparent);
+            animation: scanLine 3s linear infinite;
+        }
+
+        @keyframes scanLine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 52px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff0000, #ff4444, #cc0000);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .logo-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 4px;
+            margin-bottom: 32px;
+            text-transform: uppercase;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        /* Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding: 20px 28px;
+            background: rgba(8, 8, 12, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 60px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .header-title h1 {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .header-title span {
+            background: linear-gradient(135deg, #ff0000, #ff4444);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .header-title p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(8, 8, 12, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            border-radius: 28px;
+            padding: 22px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #ff0000, transparent);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 0, 0, 0.5);
+            box-shadow: 0 12px 32px rgba(255, 0, 0, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            color: #ff0000;
+            margin-bottom: 12px;
+        }
+
+        .stat-number {
+            font-size: 38px;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, #fff, #ff8888);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: rgba(8, 8, 12, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            border-radius: 28px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .chart-card:hover {
+            border-color: rgba(255, 0, 0, 0.4);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            border-radius: 60px;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-btn i {
+            font-size: 14px;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Forms */
+        .form-card {
+            background: rgba(8, 8, 12, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 28px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            color: #ff0000;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            padding: 14px 16px;
+            background: rgba(20, 20, 25, 0.9);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+        }
+
+        .input-group small {
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #03030a;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffaa33, #ff8800);
+            color: #03030a;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 0, 0, 0.4);
+            color: #ff0000;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        /* Lists */
+        .list-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .list-item {
+            background: rgba(20, 20, 25, 0.7);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .list-item:hover {
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-active { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
+        .badge-expired { background: rgba(255, 0, 0, 0.15); color: #ff4444; border: 1px solid rgba(255,0,0,0.3); }
+        .badge-banned { background: rgba(255, 0, 0, 0.2); color: #ff0000; }
+        .badge-admin { background: linear-gradient(135deg, rgba(255,0,0,0.2), rgba(204,0,0,0.1)); color: #ff4444; border: 1px solid rgba(255,0,0,0.3); }
+        .badge-user { background: rgba(255, 255, 255, 0.08); color: #aaa; }
+        .badge-no-lock { background: rgba(0, 229, 255, 0.15); color: #00e5ff; border: 1px solid rgba(0,229,255,0.3); }
+        .badge-auto-lock { background: rgba(255, 170, 51, 0.15); color: #ffaa33; border: 1px solid rgba(255,170,51,0.3); }
+        .badge-both-lock { background: rgba(255, 0, 0, 0.2); color: #ff6666; border: 1px solid rgba(255,0,0,0.3); }
+        .badge-device-lock { background: rgba(156, 39, 176, 0.15); color: #ce93d8; border: 1px solid rgba(156,39,176,0.3); }
+
+        .key-value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ff4444;
+            letter-spacing: 0.5px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 20px;
+            margin-top: 16px;
+            font-size: 12px;
+        }
+
+        .alert-success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .alert-error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+
+        .alert-info {
+            background: rgba(255, 0, 0, 0.05);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.95);
+            border-left: 3px solid #ff0000;
+            border-radius: 12px;
+            padding: 14px 20px;
+            z-index: 1100;
+            animation: slideInRight 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 0, 0, 0.2);
+            border-radius: 50%;
+            border-top-color: #ff0000;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff0000;
+            border-radius: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .tabs-container { flex-direction: column; border-radius: 28px; }
+            .tab-btn { justify-content: center; }
+            .dashboard-header { flex-direction: column; text-align: center; }
+            .stat-number { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="glow-orb"></div>
+    <div class="glow-orb-2"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Login Panel -->
+        <div id="loginPanel" class="login-wrapper">
+            <div class="login-card">
+                <div class="logo">✦ NEXUS SERVER</div>
+                <div class="logo-sub">SECURE ADMIN PANEL v4.0</div>
+                <div class="input-group" style="margin-bottom: 16px;">
+                    <input type="text" id="adminUser" placeholder="Username" value="admin">
+                </div>
+                <div class="input-group" style="margin-bottom: 24px;">
+                    <input type="password" id="adminPass" placeholder="Password">
+                </div>
+                <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="adminLogin()">
+                    <i class="fas fa-arrow-right-to-bracket"></i> ACCESS DASHBOARD
+                </button>
+                <div id="loginMsg"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div class="header-title">
+                    <h1><span>✦ NEXUS</span> SECURITY PANEL</h1>
+                    <p><i class="fas fa-shield-haltered"></i> Advanced Key Management System | Device Fingerprint Security</p>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-outline" onclick="refreshAllData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <button class="btn btn-outline" onclick="exportData()"><i class="fas fa-download"></i> Export</button>
+                    <button class="btn btn-danger" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid"></div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title"><i class="fas fa-chart-pie"></i> Key Status Distribution</div>
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title"><i class="fas fa-chart-line"></i> Key Generation Activity</div>
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('add')"><i class="fas fa-plus-circle"></i> Create Key</button>
+                <button class="tab-btn" onclick="switchTab('bulk')"><i class="fas fa-layer-group"></i> Bulk Generate</button>
+                <button class="tab-btn" onclick="switchTab('keys')"><i class="fas fa-key"></i> Key List</button>
+                <button class="tab-btn" onclick="switchTab('users')"><i class="fas fa-users"></i> Users</button>
+                <button class="tab-btn" onclick="switchTab('security')"><i class="fas fa-shield-alt"></i> Security</button>
+                <button class="tab-btn" onclick="switchTab('ipban')"><i class="fas fa-ban"></i> IP Ban</button>
+                <button class="tab-btn" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</button>
+            </div>
+
+            <!-- Tab: Add Key -->
+            <div id="tabAdd" class="tab-panel active">
+                <div class="form-card">
+                    <div class="section-title"><i class="fas fa-crown"></i> Create Secure Key</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-user"></i> User ID</label>
+                            <input type="text" id="userId" placeholder="Enter User ID" autocomplete="off">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-key"></i> Custom Key (Optional)</label>
+                            <input type="text" id="customKey" placeholder="Leave empty for auto">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-calendar-day"></i> Days</label>
+                            <input type="number" id="days" value="0" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-clock"></i> Hours</label>
+                            <input type="number" id="hours" value="3" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-hourglass-half"></i> Minutes</label>
+                            <input type="number" id="minutes" value="0" min="0">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-lock"></i> Security Binding Type</label>
+                            <select id="bindingType">
+                                <option value="device">🔒 Device Fingerprint (Recommended - Most Secure)</option>
+                                <option value="ip">🌐 IP Address Lock</option>
+                                <option value="both">⚡ Both IP & Device (Maximum Security)</option>
+                                <option value="none">🌍 No Lock (Any device - Least Secure)</option>
+                            </select>
+                            <small>Device fingerprint uses browser/device characteristics for unique identification</small>
+                        </div>
+                    </div>
+                    <div class="form-grid" id="customIpGroup" style="display: none;">
+                        <div class="input-group">
+                            <label><i class="fas fa-network-wired"></i> Custom IP Address (for IP lock)</label>
+                            <input type="text" id="customIp" placeholder="192.168.1.1">
+                            <small>Leave empty for auto-lock to first IP that uses it</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addKey()"><i class="fas fa-magic"></i> Create Key</button>
+                    <div id="addMsg"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Bulk Keys -->
+            <div id="tabBulk" class="tab-panel">
+                <div class="form-card">
+                    <div class="section-title"><i class="fas fa-layer-group"></i> Bulk Key Generator</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-user"></i> User ID</label>
+                            <input type="text" id="bulkUserId" placeholder="Enter User ID">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-hashtag"></i> Number of Keys</label>
+                            <input type="number" id="bulkCount" value="5" min="1" max="100">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-calendar-day"></i> Days</label>
+                            <input type="number" id="bulkDays" value="0" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-clock"></i> Hours</label>
+                            <input type="number" id="bulkHours" value="3" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-hourglass-half"></i> Minutes</label>
+                            <input type="number" id="bulkMinutes" value="0" min="0">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-lock"></i> Security Binding Type</label>
+                            <select id="bulkBindingType">
+                                <option value="device">🔒 Device Fingerprint (Recommended)</option>
+                                <option value="ip">🌐 IP Address Lock</option>
+                                <option value="both">⚡ Both IP & Device</option>
+                                <option value="none">🌍 No Lock</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid" id="bulkCustomIpGroup" style="display: none;">
+                        <div class="input-group">
+                            <label><i class="fas fa-network-wired"></i> Custom IP Address</label>
+                            <input type="text" id="bulkCustomIp" placeholder="192.168.1.1">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="bulkKeys()"><i class="fas fa-cogs"></i> Generate Bulk Keys</button>
+                    <div id="bulkMsg"></div>
+                    <div id="bulkResult" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Keys List -->
+            <div id="tabKeys" class="tab-panel">
+                <div class="form-card">
+                    <div class="section-title">
+                        <i class="fas fa-key"></i> Key Management
+                        <button class="btn btn-sm btn-warning" onclick="deleteExpired()" style="margin-left:auto;"><i class="fas fa-clock"></i> Delete Expired</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteAllKeysConfirm()"><i class="fas fa-trash-alt"></i> Delete All</button>
+                    </div>
+                    <div class="list-container" id="keysList">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Tab: Users -->
+            <div id="tabUsers" class="tab-panel">
+                <div class="form-card">
+                    <div class="section-title">
+                        <i class="fas fa-users"></i> User Management
+                        <button class="btn btn-sm btn-primary" onclick="loadUsers()" style="margin-left:auto;"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
+                    <div class="list-container" id="usersList">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Tab: Security -->
+            <div id="tabSecurity" class="tab-panel">
+                <div class="form-card">
+                    <div class="section-title"><i class="fas fa-shield-alt"></i> Security Logs & Monitoring</div>
+                    <div class="list-container" id="securityLogsList">Loading security logs...</div>
+                </div>
+                <div class="form-card">
+                    <div class="section-title"><i class="fas fa-microchip"></i> Device Blacklist Management</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-fingerprint"></i> Device Fingerprint</label>
+                            <input type="text" id="banDeviceFp" placeholder="Enter device fingerprint to ban">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-comment"></i> Reason</label>
+                            <input type="text" id="banDeviceReason" placeholder="Abuse / Exploit">
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="banDevice()"><i class="fas fa-gavel"></i> Ban Device</button>
+                    <div style="margin-top: 24px;">
+                        <div class="section-title"><i class="fas fa-list"></i> Banned Devices</div>
+                        <div class="list-container" id="bannedDevicesList">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: IP Ban -->
+            <div id="tabIpban" class="tab-panel">
+                <div class="form-card">
+                    <div class="section-title"><i class="fas fa-ban"></i> IP Ban Management</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-network-wired"></i> IP Address</label>
+                            <input type="text" id="banIp" placeholder="192.168.1.1">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-comment"></i> Reason</label>
+                            <input type="text" id="banReason" placeholder="Spam / Abuse / Suspicious">
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="banIp()"><i class="fas fa-gavel"></i> Ban IP Address</button>
+                    <div style="margin-top: 24px;">
+                        <div class="section-title"><i class="fas fa-list"></i> Banned IPs</div>
+                        <div class="list-container" id="bannedIpsList">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Settings -->
+            <div id="tabSettings" class="tab-panel">
+                <div class="form-card">
+                    <div class="section-title"><i class="fas fa-sliders-h"></i> System Configuration</div>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label><i class="fas fa-lock"></i> IP Lock Enabled</label>
+                            <select id="settingIpLock">
+                                <option value="true">Enabled (Keys locked to IP)</option>
+                                <option value="false">Disabled (Any IP can use)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-fingerprint"></i> Device Lock Enabled</label>
+                            <select id="settingDeviceLock">
+                                <option value="true">Enabled (Keys locked to device)</option>
+                                <option value="false">Disabled</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-key"></i> Max Keys Per User</label>
+                            <input type="number" id="settingMaxKeysPerUser" value="5" min="1" max="100">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-hourglass"></i> Cooldown (minutes)</label>
+                            <input type="number" id="settingCooldown" value="1" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-clock"></i> Default Duration (hours)</label>
+                            <input type="number" id="settingDefaultDuration" value="3" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-chart-line"></i> Max Uses Per Day</label>
+                            <input type="number" id="settingMaxUsesPerDay" value="100" min="1">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Save Configuration</button>
+                    <div id="settingsMsg"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // ============================================================
+        // ALDZYX NEXUS ADMIN PANEL V4.0 - ADVANCED SECURITY
+        // ============================================================
+        
+        let token = null;
+        let statusChart = null;
+        let activityChart = null;
+        const BASE_API = "https://system-nexus-key.vercel.app";
+
+        // Toggle custom IP input for add key
+        document.getElementById('bindingType')?.addEventListener('change', function() {
+            const customGroup = document.getElementById('customIpGroup');
+            if (customGroup) {
+                customGroup.style.display = this.value === 'ip' || this.value === 'both' ? 'flex' : 'none';
+            }
+        });
+
+        document.getElementById('bulkBindingType')?.addEventListener('change', function() {
+            const customGroup = document.getElementById('bulkCustomIpGroup');
+            if (customGroup) {
+                customGroup.style.display = this.value === 'ip' || this.value === 'both' ? 'flex' : 'none';
+            }
+        });
+
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = show ? 'flex' : 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.borderLeftColor = type === 'success' ? '#00ff88' : (type === 'error' ? '#ff0000' : '#ffaa33');
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle')}"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+            for (let i = 0; i < 60; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = Math.random() * 15 + 8 + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        function checkSession() {
+            const savedToken = localStorage.getItem('nexus_admin_token');
+            if (savedToken) {
+                token = savedToken;
+                verifyTokenAndLoad();
+            }
+        }
+
+        async function verifyTokenAndLoad() {
+            showLoading(true);
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/stats`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('loginPanel').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    await loadStats();
+                    await loadKeys();
+                    await loadUsers();
+                    await loadSettings();
+                    await loadBannedIps();
+                    await loadSecurityLogs();
+                    await loadBannedDevices();
+                    initCharts();
+                    showToast('Session restored | Welcome back', 'success');
+                } else {
+                    localStorage.removeItem('nexus_admin_token');
+                    token = null;
+                }
+            } catch (err) {
+                console.error('Session check error:', err);
+                localStorage.removeItem('nexus_admin_token');
+                token = null;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function adminLogin() {
+            const username = document.getElementById('adminUser').value;
+            const password = document.getElementById('adminPass').value;
+            showLoading(true);
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    token = data.token;
+                    localStorage.setItem('nexus_admin_token', token);
+                    document.getElementById('loginPanel').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    await loadStats();
+                    await loadKeys();
+                    await loadUsers();
+                    await loadSettings();
+                    await loadBannedIps();
+                    await loadSecurityLogs();
+                    await loadBannedDevices();
+                    initCharts();
+                    showToast('Login successful | Nexus Security Active', 'success');
+                } else {
+                    document.getElementById('loginMsg').innerHTML = '<div class="alert alert-error">❌ Invalid credentials</div>';
+                    showToast('Invalid credentials', 'error');
+                }
+            } catch (err) {
+                document.getElementById('loginMsg').innerHTML = `<div class="alert alert-error">❌ Network error: ${err.message}</div>`;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function adminLogout() {
+            showLoading(true);
+            try {
+                await fetch(`${BASE_API}/api/admin/logout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+            } catch (err) {}
+            finally {
+                localStorage.removeItem('nexus_admin_token');
+                token = null;
+                document.getElementById('loginPanel').style.display = 'flex';
+                document.getElementById('dashboard').style.display = 'none';
+                showLoading(false);
+                showToast('Logged out securely', 'info');
+            }
+        }
+
+        async function refreshAllData() {
+            showLoading(true);
+            await loadStats();
+            await loadKeys();
+            await loadUsers();
+            await loadBannedIps();
+            await loadSecurityLogs();
+            await loadBannedDevices();
+            showLoading(false);
+            showToast('All data refreshed', 'success');
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/stats`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const statsHtml = `
+                        <div class="stat-card" onclick="switchTab('keys')">
+                            <div class="stat-icon"><i class="fas fa-key"></i></div>
+                            <div class="stat-number">${data.stats.totalKeys}</div>
+                            <div class="stat-label">Total Keys</div>
+                        </div>
+                        <div class="stat-card" onclick="switchTab('keys')">
+                            <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="stat-number">${data.stats.activeKeys}</div>
+                            <div class="stat-label">Active Keys</div>
+                        </div>
+                        <div class="stat-card" onclick="switchTab('users')">
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-number">${data.stats.totalUsers}</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                        <div class="stat-card" onclick="switchTab('users')">
+                            <div class="stat-icon"><i class="fas fa-ban"></i></div>
+                            <div class="stat-number">${data.stats.bannedUsers}</div>
+                            <div class="stat-label">Banned Users</div>
+                        </div>
+                        <div class="stat-card" onclick="switchTab('security')">
+                            <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="stat-number">${data.stats.activeSessions || 0}</div>
+                            <div class="stat-label">Active Sessions</div>
+                        </div>
+                        <div class="stat-card" onclick="switchTab('ipban')">
+                            <div class="stat-icon"><i class="fas fa-network-wired"></i></div>
+                            <div class="stat-number">${data.stats.bannedIps || 0}</div>
+                            <div class="stat-label">Banned IPs</div>
+                        </div>
+                    `;
+                    document.getElementById('statsGrid').innerHTML = statsHtml;
+                    updateCharts(data.stats);
+                }
+            } catch (err) {
+                console.error('Load stats error:', err);
+            }
+        }
+
+        function initCharts() {
+            const ctx1 = document.getElementById('statusChart');
+            const ctx2 = document.getElementById('activityChart');
+            if (ctx1 && ctx2) {
+                statusChart = new Chart(ctx1.getContext('2d'), {
+                    type: 'doughnut',
+                    data: { labels: ['Active', 'Expired'], datasets: [{ data: [0, 0], backgroundColor: ['#00ff88', '#ff0000'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: 'white' } } } }
+                });
+                activityChart = new Chart(ctx2.getContext('2d'), {
+                    type: 'line',
+                    data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Keys Generated', data: [0,0,0,0,0,0,0], borderColor: '#ff0000', backgroundColor: 'rgba(255,0,0,0.1)', tension: 0.4, fill: true }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } } }
+                });
+            }
+        }
+
+        function updateCharts(stats) {
+            if (statusChart) {
+                const active = stats.activeKeys || 0;
+                const expired = (stats.totalKeys || 0) - active;
+                statusChart.data.datasets[0].data = [active, expired];
+                statusChart.update();
+            }
+        }
+
+        async function loadKeys() {
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                const data = await res.json();
+                if (data.success && data.keys) {
+                    const container = document.getElementById('keysList');
+                    if (data.keys.length === 0) {
+                        container.innerHTML = '<div class="alert alert-info">No keys found in database</div>';
+                    } else {
+                        container.innerHTML = data.keys.map(k => {
+                            const isAdminKey = k.is_admin_key === 1;
+                            let lockStatus = '';
+                            let lockBadgeClass = '';
+                            let bindingIcon = '';
+                            
+                            if (k.binding_type === 'device') {
+                                bindingIcon = '🔒';
+                                lockStatus = k.locked_device_fingerprint ? 'Device locked' : 'Auto-lock to device';
+                                lockBadgeClass = 'badge-device-lock';
+                            } else if (k.binding_type === 'both') {
+                                bindingIcon = '⚡';
+                                lockStatus = k.locked_ip ? `IP: ${k.locked_ip}` : 'Auto-lock IP & Device';
+                                lockBadgeClass = 'badge-both-lock';
+                            } else if (!k.locked_ip) {
+                                bindingIcon = '🔓';
+                                lockStatus = 'Auto-lock on first use';
+                                lockBadgeClass = 'badge-auto-lock';
+                            } else if (k.locked_ip === '0.0.0.0') {
+                                bindingIcon = '🌍';
+                                lockStatus = 'No Lock (any IP/device)';
+                                lockBadgeClass = 'badge-no-lock';
+                            } else {
+                                bindingIcon = '🌐';
+                                lockStatus = `IP: ${k.locked_ip}`;
+                                lockBadgeClass = 'badge-admin';
+                            }
+                            
+                            return `
+                                <div class="list-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                        <div><span class="key-value"><i class="fas fa-key"></i> ${k.key_text}</span></div>
+                                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                            <span class="badge ${k.status === 'active' ? 'badge-active' : 'badge-expired'}">${k.status}</span>
+                                            <span class="badge ${isAdminKey ? 'badge-admin' : 'badge-user'}">${isAdminKey ? 'ADMIN' : 'USER'}</span>
+                                            <span class="badge ${lockBadgeClass}">${bindingIcon} ${lockStatus.substring(0, 30)}</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 11px; color: rgba(255,255,255,0.4);">
+                                        <span><i class="fas fa-user"></i> User: ${k.user_id}</span>
+                                        <span><i class="fas fa-hourglass"></i> ${k.duration_hours}h</span>
+                                        <span><i class="fas fa-calendar"></i> Expires: ${new Date(k.expiry_ms).toLocaleString()}</span>
+                                        <span><i class="fas fa-chart-simple"></i> Used: ${k.used_count || 0}x</span>
+                                    </div>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteKey('${k.key_text}')" style="margin-top: 12px;"><i class="fas fa-trash"></i> Delete</button>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (err) {
+                console.error('Load keys error:', err);
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                const data = await res.json();
+                if (data.success && data.users) {
+                    const container = document.getElementById('usersList');
+                    if (data.users.length === 0) {
+                        container.innerHTML = '<div class="alert alert-info">No users registered</div>';
+                    } else {
+                        container.innerHTML = data.users.map(u => `
+                            <div class="list-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                    <div><strong><i class="fas fa-user-circle"></i> ${u.user_id}</strong></div>
+                                    <div><span class="badge ${u.banned === 1 ? 'badge-banned' : 'badge-active'}">${u.banned === 1 ? 'BANNED' : 'ACTIVE'}</span></div>
+                                </div>
+                                <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 11px; color: rgba(255,255,255,0.4);">
+                                    <span><i class="fas fa-key"></i> Keys: ${u.keys_generated || 0}</span>
+                                    <span><i class="fas fa-calendar"></i> Registered: ${new Date(u.created_at).toLocaleString()}</span>
+                                    <span><i class="fas fa-network-wired"></i> IP: ${u.ip_address || 'N/A'}</span>
+                                    ${u.device_fingerprint ? `<span><i class="fas fa-fingerprint"></i> FP: ${u.device_fingerprint.substring(0, 16)}...</span>` : ''}
+                                </div>
+                                <div style="margin-top: 12px;">
+                                    ${u.banned === 1 ? 
+                                        `<button class="btn btn-sm btn-success" onclick="unbanUser('${u.user_id}')"><i class="fas fa-check"></i> Unban User</button>` :
+                                        `<button class="btn btn-sm btn-danger" onclick="banUser('${u.user_id}')"><i class="fas fa-ban"></i> Ban User</button>`
+                                    }
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error('Load users error:', err);
+            }
+        }
+
+        async function loadSecurityLogs() {
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/security-logs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, limit: 50 })
+                });
+                const data = await res.json();
+                const container = document.getElementById('securityLogsList');
+                if (container) {
+                    if (data.success && data.logs && data.logs.length > 0) {
+                        container.innerHTML = data.logs.map(log => `
+                            <div class="list-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                                    <div><span class="badge badge-admin">${log.event_type}</span></div>
+                                    <div style="font-size: 10px; color: rgba(255,255,255,0.4);">${new Date(log.timestamp).toLocaleString()}</div>
+                                </div>
+                                <div style="margin-top: 8px; font-size: 12px;">${log.details || 'No details'}</div>
+                                <div style="margin-top: 6px; font-size: 10px; color: rgba(255,255,255,0.3);">
+                                    <i class="fas fa-network-wired"></i> IP: ${log.ip_address || 'N/A'}
+                                    ${log.device_fingerprint ? ` | <i class="fas fa-fingerprint"></i> ${log.device_fingerprint.substring(0, 16)}...` : ''}
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<div class="alert alert-info">No security logs available</div>';
+                    }
+                }
+            } catch (err) {
+                console.error('Load security logs error:', err);
+            }
+        }
+
+        async function loadBannedDevices() {
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/banned-devices`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                const data = await res.json();
+                const container = document.getElementById('bannedDevicesList');
+                if (container) {
+                    if (data.success && data.devices && data.devices.length > 0) {
+                        container.innerHTML = data.devices.map(d => `
+                            <div class="list-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                                    <div><i class="fas fa-fingerprint"></i> <code>${d.device_fingerprint}</code></div>
+                                    <button class="btn btn-sm btn-success" onclick="unbanDevice('${d.device_fingerprint}')"><i class="fas fa-check"></i> Unban</button>
+                                </div>
+                                <div style="margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.4);">
+                                    Reason: ${d.reason || 'No reason'} | Banned: ${new Date(d.banned_at).toLocaleString()}
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<div class="alert alert-info">No banned devices</div>';
+                    }
+                }
+            } catch (err) {
+                console.error('Load banned devices error:', err);
+            }
+        }
+
+        async function loadBannedIps() {
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/banned-ips`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                const data = await res.json();
+                const container = document.getElementById('bannedIpsList');
+                if (container) {
+                    if (data.success && data.ips && data.ips.length > 0) {
+                        container.innerHTML = data.ips.map(ip => `
+                            <div class="list-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                                    <div><i class="fas fa-network-wired"></i> <strong>${ip.ip_address}</strong></div>
+                                    <button class="btn btn-sm btn-success" onclick="unbanIp('${ip.ip_address}')"><i class="fas fa-check"></i> Unban</button>
+                                </div>
+                                <div style="margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.4);">
+                                    Reason: ${ip.reason || 'No reason'} | Banned: ${new Date(ip.banned_at).toLocaleString()}
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<div class="alert alert-info">No banned IPs</div>';
+                    }
+                }
+            } catch (err) {
+                console.error('Load banned IPs error:', err);
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/get-settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const ipLockSelect = document.getElementById('settingIpLock');
+                    const deviceLockSelect = document.getElementById('settingDeviceLock');
+                    const maxKeysInput = document.getElementById('settingMaxKeysPerUser');
+                    const cooldownInput = document.getElementById('settingCooldown');
+                    const defaultDurationInput = document.getElementById('settingDefaultDuration');
+                    const maxUsesInput = document.getElementById('settingMaxUsesPerDay');
+                    
+                    if (ipLockSelect) ipLockSelect.value = data.settings.ip_lock_enabled || 'true';
+                    if (deviceLockSelect) deviceLockSelect.value = data.settings.device_lock_enabled || 'true';
+                    if (maxKeysInput) maxKeysInput.value = data.settings.max_keys_per_user || '5';
+                    if (cooldownInput) cooldownInput.value = data.settings.cooldown_minutes || '1';
+                    if (defaultDurationInput) defaultDurationInput.value = data.settings.default_duration_hours || '3';
+                    if (maxUsesInput) maxUsesInput.value = data.settings.max_uses_per_day || '100';
+                }
+            } catch (err) {
+                console.error('Load settings error:', err);
+            }
+        }
+
+        async function saveSettings() {
+            showLoading(true);
+            const settings = {
+                ip_lock_enabled: document.getElementById('settingIpLock')?.value || 'true',
+                device_lock_enabled: document.getElementById('settingDeviceLock')?.value || 'true',
+                max_keys_per_user: document.getElementById('settingMaxKeysPerUser')?.value || '5',
+                cooldown_minutes: document.getElementById('settingCooldown')?.value || '1',
+                default_duration_hours: document.getElementById('settingDefaultDuration')?.value || '3',
+                max_uses_per_day: document.getElementById('settingMaxUsesPerDay')?.value || '100'
+            };
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, ...settings })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Settings saved successfully', 'success');
+                } else {
+                    showToast('Failed to save settings', 'error');
+                }
+            } catch (err) {
+                showToast('Network error', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function addKey() {
+            const userId = document.getElementById('userId')?.value;
+            const days = parseInt(document.getElementById('days')?.value) || 0;
+            const hours = parseInt(document.getElementById('hours')?.value) || 0;
+            const minutes = parseInt(document.getElementById('minutes')?.value) || 0;
+            const keyText = document.getElementById('customKey')?.value;
+            const bindingType = document.getElementById('bindingType')?.value;
+            const customIp = document.getElementById('customIp')?.value;
+            
+            let lockToIp = null;
+            
+            if (bindingType === 'ip' || bindingType === 'both') {
+                lockToIp = customIp || null;
+            } else if (bindingType === 'none') {
+                lockToIp = '0.0.0.0';
+            }
+            
+            if (!userId) { showToast('User ID required', 'error'); return; }
+            
+            showLoading(true);
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/add-key`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, userId, days, hours, minutes, keyText, lockToIp, bindingType })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    let bindingMsg = '';
+                    switch(bindingType) {
+                        case 'device': bindingMsg = '🔒 Device fingerprint lock (auto)'; break;
+                        case 'ip': bindingMsg = lockToIp ? `🔒 Locked to IP: ${lockToIp}` : '🔒 Auto-lock to first IP'; break;
+                        case 'both': bindingMsg = '⚡ Locked to both IP & device'; break;
+                        default: bindingMsg = '🌍 No lock (insecure)';
+                    }
+                    showToast(`Key created: ${data.key}`, 'success');
+                    const addMsg = document.getElementById('addMsg');
+                    if (addMsg) {
+                        addMsg.innerHTML = `<div class="alert alert-success">✅ Key: <strong>${data.key}</strong><br>📅 Expires: ${data.expiryFormatted}<br>🔐 ${bindingMsg}</div>`;
+                    }
+                    loadStats(); loadKeys();
+                } else { showToast(data.error, 'error'); }
+            } catch (err) {
+                showToast('Network error', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function bulkKeys() {
+            const userId = document.getElementById('bulkUserId')?.value;
+            const count = parseInt(document.getElementById('bulkCount')?.value) || 1;
+            const days = parseInt(document.getElementById('bulkDays')?.value) || 0;
+            const hours = parseInt(document.getElementById('bulkHours')?.value) || 0;
+            const minutes = parseInt(document.getElementById('bulkMinutes')?.value) || 0;
+            const bindingType = document.getElementById('bulkBindingType')?.value;
+            const customIp = document.getElementById('bulkCustomIp')?.value;
+            
+            let lockToIp = null;
+            
+            if (bindingType === 'ip' || bindingType === 'both') {
+                lockToIp = customIp || null;
+            } else if (bindingType === 'none') {
+                lockToIp = '0.0.0.0';
+            }
+            
+            if (!userId) { showToast('User ID required', 'error'); return; }
+            if (count > 100) { showToast('Max 100 keys at once', 'error'); return; }
+            
+            showLoading(true);
+            try {
+                const res = await fetch(`${BASE_API}/api/admin/add-bulk-keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, userId, count, days, hours, minutes, lockToIp, bindingType })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Generated ${data.count} keys`, 'success');
+                    const bulkMsg = document.getElementById('bulkMsg');
+                    const bulkResult = document.getElementById('bulkResult');
+                    if (bulkMsg) bulkMsg.innerHTML = `<div class="alert alert-success">✅ Generated ${data.count} keys for ${userId}</div>`;
+                    if (bulkResult) bulkResult.innerHTML = `<div class="form-card"><h4><i class="fas fa-list"></i> Generated Keys:</h4>${data.keys.map(k => `<div class="key-value"><i class="fas fa-key"></i> ${k}</div>`).join('')}<div style="margin-top:12px;"><i class="fas fa-calendar"></i> All expire: ${data.expiryFormatted}</div></div>`;
+                    loadStats(); loadKeys();
+                } else { showToast(data.error, 'error'); }
+            } catch (err) {
+                showToast('Network error', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function deleteKey(key) { if(confirm(`⚠️ Delete key: ${key}?`)){ showLoading(true); await fetch(`${BASE_API}/api/admin/delete-key`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, key}) }); loadKeys(); loadStats(); showToast('Key deleted', 'success'); showLoading(false); } }
+        async function deleteExpired() { if(confirm('Delete all expired keys?')){ showLoading(true); await fetch(`${BASE_API}/api/admin/delete-expired-keys`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token}) }); loadKeys(); loadStats(); showToast('Expired keys deleted', 'success'); showLoading(false); } }
+        async function deleteAllKeysConfirm() { if(confirm('⚠️⚠️⚠️ DELETE ALL KEYS? This action is PERMANENT and cannot be undone! ⚠️⚠️⚠️')){ showLoading(true); await fetch(`${BASE_API}/api/admin/delete-all-keys`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token}) }); loadKeys(); loadStats(); showToast('All keys deleted', 'success'); showLoading(false); } }
+        
+        async function banUser(userId) { if(confirm(`Ban user ${userId}?`)){ showLoading(true); await fetch(`${BASE_API}/api/admin/ban-user`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, userId}) }); loadUsers(); loadStats(); showToast(`User ${userId} banned`, 'success'); showLoading(false); } }
+        async function unbanUser(userId) { showLoading(true); await fetch(`${BASE_API}/api/admin/unban-user`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, userId}) }); loadUsers(); loadStats(); showToast(`User ${userId} unbanned`, 'success'); showLoading(false); }
+        
+        async function banIp() { const ip = document.getElementById('banIp')?.value; const reason = document.getElementById('banReason')?.value; if(!ip){ showToast('IP required', 'error'); return; } showLoading(true); const res = await fetch(`${BASE_API}/api/admin/ban-ip`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, ip, reason}) }); const data = await res.json(); if(data.success){ showToast(`IP ${ip} banned`, 'success'); loadBannedIps(); } else { showToast(data.error, 'error'); } showLoading(false); }
+        async function unbanIp(ip) { showLoading(true); await fetch(`${BASE_API}/api/admin/unban-ip`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, ip}) }); loadBannedIps(); showToast(`IP ${ip} unbanned`, 'success'); showLoading(false); }
+        
+        async function banDevice() { const deviceFp = document.getElementById('banDeviceFp')?.value; const reason = document.getElementById('banDeviceReason')?.value; if(!deviceFp){ showToast('Device fingerprint required', 'error'); return; } showLoading(true); const res = await fetch(`${BASE_API}/api/admin/ban-device`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, deviceFingerprint: deviceFp, reason}) }); const data = await res.json(); if(data.success){ showToast('Device banned', 'success'); loadBannedDevices(); } else { showToast(data.error, 'error'); } showLoading(false); }
+        async function unbanDevice(deviceFp) { showLoading(true); await fetch(`${BASE_API}/api/admin/unban-device`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, deviceFingerprint: deviceFp}) }); loadBannedDevices(); showToast('Device unbanned', 'success'); showLoading(false); }
+        
+        function exportData() { showToast('Export via Supabase dashboard or API', 'info'); }
+        
+        function switchTab(tab) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const btns = document.querySelectorAll('.tab-btn');
+            panels.forEach(p => p.classList.remove('active'));
+            btns.forEach(b => b.classList.remove('active'));
+            const tabMap = { add: 'Add', bulk: 'Bulk', keys: 'Keys', users: 'Users', security: 'Security', ipban: 'Ipban', settings: 'Settings' };
+            const targetId = `tab${tabMap[tab]}`;
+            const targetPanel = document.getElementById(targetId);
+            if (targetPanel) targetPanel.classList.add('active');
+            const btnsArray = Array.from(btns);
+            const index = btnsArray.findIndex(btn => btn.innerText.toLowerCase().includes(tab));
+            if (btnsArray[index]) btnsArray[index].classList.add('active');
+            if (tab === 'keys') loadKeys();
+            if (tab === 'users') loadUsers();
+            if (tab === 'security') { loadSecurityLogs(); loadBannedDevices(); }
+            if (tab === 'ipban') loadBannedIps();
+        }
+
+        checkSession();
+    </script>
+</body>
+</html>
