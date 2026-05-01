@@ -678,62 +678,62 @@
                 <button class="tab-btn" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</button>
             </div>
 
-            <!-- Tab: Add Key (TAMBAH FITUR MAX DEVICES) -->
-            <div id="tabAdd" class="tab-panel active">
-                <div class="form-card">
-                    <div class="section-title"><i class="fas fa-crown"></i> Create Secure Key</div>
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label><i class="fas fa-user"></i> User ID</label>
-                            <input type="text" id="userId" placeholder="Enter User ID" autocomplete="off">
-                        </div>
-                        <div class="input-group">
-                            <label><i class="fas fa-key"></i> Custom Key (Optional)</label>
-                            <input type="text" id="customKey" placeholder="Leave empty for auto">
-                        </div>
-                    </div>
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label><i class="fas fa-calendar-day"></i> Days</label>
-                            <input type="number" id="days" value="0" min="0">
-                        </div>
-                        <div class="input-group">
-                            <label><i class="fas fa-clock"></i> Hours</label>
-                            <input type="number" id="hours" value="3" min="0">
-                        </div>
-                        <div class="input-group">
-                            <label><i class="fas fa-hourglass-half"></i> Minutes</label>
-                            <input type="number" id="minutes" value="0" min="0">
-                        </div>
-                        <div class="input-group">
-                            <label><i class="fas fa-mobile-alt"></i> Max Devices</label>
-                            <input type="number" id="maxDevices" value="1" min="1" max="10">
-                            <small>Maximum devices that can use this key</small>
-                        </div>
-                    </div>
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label><i class="fas fa-lock"></i> Security Binding Type</label>
-                            <select id="bindingType">
-                                <option value="device">🔒 Device Fingerprint (Recommended - Most Secure)</option>
-                                <option value="ip">🌐 IP Address Lock</option>
-                                <option value="both">⚡ Both IP & Device (Maximum Security)</option>
-                                <option value="none">🌍 No Lock (Any device - Least Secure)</option>
-                            </select>
-                            <small>Device fingerprint uses browser/device characteristics for unique identification</small>
-                        </div>
-                    </div>
-                    <div class="form-grid" id="customIpGroup" style="display: none;">
-                        <div class="input-group">
-                            <label><i class="fas fa-network-wired"></i> Custom IP Address (for IP lock)</label>
-                            <input type="text" id="customIp" placeholder="192.168.1.1">
-                            <small>Leave empty for auto-lock to first IP that uses it</small>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" onclick="addKey()"><i class="fas fa-magic"></i> Create Key</button>
-                    <div id="addMsg"></div>
-                </div>
+<!-- Tab: Add Key -->
+<div id="tabAdd" class="tab-panel active">
+    <div class="form-card">
+        <div class="section-title"><i class="fas fa-crown"></i> Create Secure Key</div>
+        <div class="form-grid">
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> User ID</label>
+                <input type="text" id="userId" placeholder="Enter User ID">
             </div>
+            <div class="input-group">
+                <label><i class="fas fa-key"></i> Custom Key (Optional)</label>
+                <input type="text" id="customKey" placeholder="Leave empty for auto">
+            </div>
+        </div>
+        <div class="form-grid">
+            <div class="input-group">
+                <label><i class="fas fa-calendar-day"></i> Days</label>
+                <input type="number" id="days" value="0" min="0">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-clock"></i> Hours</label>
+                <input type="number" id="hours" value="3" min="0">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-hourglass-half"></i> Minutes</label>
+                <input type="number" id="minutes" value="0" min="0">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-mobile-alt"></i> Max Devices</label>
+                <input type="number" id="maxDevices" value="1" min="1" max="10">
+                <small>Maximum devices that can use this key</small>
+            </div>
+        </div>
+        <div class="form-grid">
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Security Binding Type</label>
+                <select id="bindingType">
+                    <option value="device">🔒 Device Fingerprint (Recommended)</option>
+                    <option value="ip">🌐 IP Address Lock</option>
+                    <option value="both">⚡ Both IP & Device (Maximum Security)</option>
+                    <option value="none">🌍 No Lock (Insecure)</option>
+                </select>
+                <small>Device fingerprint uses browser/device characteristics for unique identification</small>
+            </div>
+        </div>
+        <div class="form-grid" id="customIpGroup" style="display: none;">
+            <div class="input-group">
+                <label><i class="fas fa-network-wired"></i> Custom IP Address</label>
+                <input type="text" id="customIp" placeholder="192.168.1.1">
+                <small>Leave empty for auto-lock to first IP that uses it</small>
+            </div>
+        </div>
+        <button class="btn btn-primary" onclick="addKey()"><i class="fas fa-magic"></i> Create Key</button>
+        <div id="addMsg"></div>
+    </div>
+</div>
 
             <!-- Tab: Bulk Keys (TAMBAH FITUR MAX DEVICES) -->
             <div id="tabBulk" class="tab-panel">
@@ -951,10 +951,12 @@
         const BASE_API = "https://system-nexus-key.vercel.app";
 
         // Toggle custom IP input for add key
-        document.getElementById('bindingType')?.addEventListener('change', function() {
-            const customGroup = document.getElementById('customIpGroup');
-            if (customGroup) customGroup.style.display = this.value === 'ip' || this.value === 'both' ? 'flex' : 'none';
-        });
+    document.getElementById('bindingType')?.addEventListener('change', function() {
+    const customGroup = document.getElementById('customIpGroup');
+    if (customGroup) {
+        customGroup.style.display = this.value === 'ip' || this.value === 'both' ? 'flex' : 'none';
+    }
+});
 
         document.getElementById('bulkBindingType')?.addEventListener('change', function() {
             const customGroup = document.getElementById('bulkCustomIpGroup');
@@ -1249,62 +1251,199 @@
         }
 
         async function addKey() {
-            const userId = document.getElementById('userId')?.value;
-            const days = parseInt(document.getElementById('days')?.value) || 0;
-            const hours = parseInt(document.getElementById('hours')?.value) || 0;
-            const minutes = parseInt(document.getElementById('minutes')?.value) || 0;
-            const maxDevices = parseInt(document.getElementById('maxDevices')?.value) || 1;
-            const keyText = document.getElementById('customKey')?.value;
-            const bindingType = document.getElementById('bindingType')?.value;
-            const customIp = document.getElementById('customIp')?.value;
+    const userId = document.getElementById('userId')?.value;
+    const days = parseInt(document.getElementById('days')?.value) || 0;
+    const hours = parseInt(document.getElementById('hours')?.value) || 0;
+    const minutes = parseInt(document.getElementById('minutes')?.value) || 0;
+    const maxDevices = parseInt(document.getElementById('maxDevices')?.value) || 1;
+    const keyText = document.getElementById('customKey')?.value;
+    const bindingType = document.getElementById('bindingType')?.value;
+    const customIp = document.getElementById('customIp')?.value;
+    
+    // Validasi input
+    if (!userId) {
+        showToast('User ID required', 'error');
+        return;
+    }
+    
+    if (days === 0 && hours === 0 && minutes === 0) {
+        showToast('Please set duration (days, hours, or minutes)', 'error');
+        return;
+    }
+    
+    let lockToIp = null;
+    if (bindingType === 'ip' || bindingType === 'both') {
+        lockToIp = customIp || null;
+    } else if (bindingType === 'none') {
+        lockToIp = '0.0.0.0';
+    }
+    
+    showLoading(true);
+    
+    try {
+        const res = await fetch(`${BASE_API}/api/admin/add-key`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                token, 
+                userId, 
+                days, 
+                hours, 
+                minutes, 
+                maxDevices, 
+                keyText, 
+                lockToIp, 
+                bindingType 
+            })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            // Format pesan durasi
+            let durationMsg = '';
+            if (days > 0) durationMsg += `${days} day${days > 1 ? 's' : ''} `;
+            if (hours > 0) durationMsg += `${hours} hour${hours > 1 ? 's' : ''} `;
+            if (minutes > 0) durationMsg += `${minutes} minute${minutes > 1 ? 's' : ''}`;
+            if (!durationMsg) durationMsg = `${data.duration?.totalHours || 0} hours`;
             
-            let lockToIp = null;
-            if (bindingType === 'ip' || bindingType === 'both') lockToIp = customIp || null;
-            else if (bindingType === 'none') lockToIp = '0.0.0.0';
+            let bindingMsg = '';
+            switch(bindingType) {
+                case 'device': bindingMsg = `🔒 Device fingerprint lock (${maxDevices} device max)`; break;
+                case 'ip': bindingMsg = lockToIp ? `🔒 Locked to IP: ${lockToIp}` : '🔒 Auto-lock to first IP'; break;
+                case 'both': bindingMsg = `⚡ Locked to both IP & device (${maxDevices} device max)`; break;
+                default: bindingMsg = '🌍 No lock (insecure)';
+            }
             
-            if (!userId) { alert('User ID required'); return; }
+            showToast(`✅ Key created: ${data.key}`, 'success');
             
-            showLoading(true);
-            try {
-                const res = await fetch(`${BASE_API}/api/admin/add-key`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, userId, days, hours, minutes, maxDevices, keyText, lockToIp, bindingType }) });
-                const data = await res.json();
-                if (data.success) {
-                    alert(`Key created: ${data.key}\nMax Devices: ${maxDevices}`);
-                    document.getElementById('addMsg').innerHTML = `<div class="alert alert-success">✅ Key: ${data.key}<br>📱 Max Devices: ${maxDevices}</div>`;
-                    loadStats(); loadKeys();
-                } else { alert(data.error); }
-            } catch(err) { alert('Error'); } finally { showLoading(false); }
+            const addMsg = document.getElementById('addMsg');
+            if (addMsg) {
+                addMsg.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> 
+                        <strong>Key created successfully!</strong><br>
+                        🔑 Key: <code style="background:rgba(0,0,0,0.5); padding:4px 8px; border-radius:8px;">${data.key}</code><br>
+                        📅 Expires: ${data.expiryFormatted}<br>
+                        ⏰ Duration: ${durationMsg.trim()}<br>
+                        📱 Max Devices: ${maxDevices}<br>
+                        🔐 ${bindingMsg}
+                    </div>
+                `;
+            }
+            
+            // Refresh daftar key dan statistik
+            loadStats();
+            loadKeys();
+            
+        } else {
+            showToast(`❌ Failed: ${data.error}`, 'error');
+            const addMsg = document.getElementById('addMsg');
+            if (addMsg) {
+                addMsg.innerHTML = `<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Error: ${data.error}</div>`;
+            }
         }
+        
+    } catch (err) {
+        console.error('Add key error:', err);
+        showToast(`❌ Network error: ${err.message}`, 'error');
+        const addMsg = document.getElementById('addMsg');
+        if (addMsg) {
+            addMsg.innerHTML = `<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Network error: ${err.message}</div>`;
+        }
+    } finally {
+        showLoading(false);
+    }
+}
 
         async function bulkKeys() {
-            const userId = document.getElementById('bulkUserId')?.value;
-            const count = parseInt(document.getElementById('bulkCount')?.value) || 1;
-            const days = parseInt(document.getElementById('bulkDays')?.value) || 0;
-            const hours = parseInt(document.getElementById('bulkHours')?.value) || 0;
-            const minutes = parseInt(document.getElementById('bulkMinutes')?.value) || 0;
-            const maxDevices = parseInt(document.getElementById('bulkMaxDevices')?.value) || 1;
-            const bindingType = document.getElementById('bulkBindingType')?.value;
-            const customIp = document.getElementById('bulkCustomIp')?.value;
+    const userId = document.getElementById('bulkUserId')?.value;
+    const count = parseInt(document.getElementById('bulkCount')?.value) || 1;
+    const days = parseInt(document.getElementById('bulkDays')?.value) || 0;
+    const hours = parseInt(document.getElementById('bulkHours')?.value) || 0;
+    const minutes = parseInt(document.getElementById('bulkMinutes')?.value) || 0;
+    const maxDevices = parseInt(document.getElementById('bulkMaxDevices')?.value) || 1;
+    const bindingType = document.getElementById('bulkBindingType')?.value;
+    const customIp = document.getElementById('bulkCustomIp')?.value;
+    
+    if (!userId) {
+        showToast('User ID required', 'error');
+        return;
+    }
+    
+    if (days === 0 && hours === 0 && minutes === 0) {
+        showToast('Please set duration', 'error');
+        return;
+    }
+    
+    if (count > 100) {
+        showToast('Max 100 keys at once', 'error');
+        return;
+    }
+    
+    let lockToIp = null;
+    if (bindingType === 'ip' || bindingType === 'both') {
+        lockToIp = customIp || null;
+    } else if (bindingType === 'none') {
+        lockToIp = '0.0.0.0';
+    }
+    
+    showLoading(true);
+    
+    try {
+        const res = await fetch(`${BASE_API}/api/admin/add-bulk-keys`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                token, userId, count, days, hours, minutes, maxDevices, lockToIp, bindingType 
+            })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            let durationMsg = '';
+            if (days > 0) durationMsg += `${days} day${days > 1 ? 's' : ''} `;
+            if (hours > 0) durationMsg += `${hours} hour${hours > 1 ? 's' : ''} `;
+            if (minutes > 0) durationMsg += `${minutes} minute${minutes > 1 ? 's' : ''}`;
             
-            let lockToIp = null;
-            if (bindingType === 'ip' || bindingType === 'both') lockToIp = customIp || null;
-            else if (bindingType === 'none') lockToIp = '0.0.0.0';
+            showToast(`✅ Generated ${data.count} keys`, 'success');
             
-            if (!userId) { alert('User ID required'); return; }
-            if (count > 100) { alert('Max 100 keys'); return; }
+            const bulkMsg = document.getElementById('bulkMsg');
+            const bulkResult = document.getElementById('bulkResult');
             
-            showLoading(true);
-            try {
-                const res = await fetch(`${BASE_API}/api/admin/add-bulk-keys`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, userId, count, days, hours, minutes, maxDevices, lockToIp, bindingType }) });
-                const data = await res.json();
-                if (data.success) {
-                    alert(`Generated ${data.count} keys`);
-                    document.getElementById('bulkMsg').innerHTML = `<div class="alert alert-success">✅ Generated ${data.count} keys</div>`;
-                    document.getElementById('bulkResult').innerHTML = `<div class="form-card"><h4>Generated Keys:</h4>${data.keys.map(k => `<div class="key-value">🔑 ${k}</div>`).join('')}</div>`;
-                    loadStats(); loadKeys();
-                } else { alert(data.error); }
-            } catch(err) { alert('Error'); } finally { showLoading(false); }
+            if (bulkMsg) {
+                bulkMsg.innerHTML = `<div class="alert alert-success">✅ Generated ${data.count} keys for ${userId}<br>⏰ Duration: ${durationMsg.trim()}<br>📱 Max Devices: ${maxDevices}</div>`;
+            }
+            
+            if (bulkResult) {
+                bulkResult.innerHTML = `
+                    <div class="form-card" style="margin-top:16px;">
+                        <div class="section-title"><i class="fas fa-list"></i> Generated Keys (${data.count})</div>
+                        <div style="max-height:300px; overflow-y:auto;">
+                            ${data.keys.map(k => `<div class="key-value" style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.1);"><i class="fas fa-key"></i> ${k}</div>`).join('')}
+                        </div>
+                        <div style="margin-top:12px; font-size:11px; color:rgba(255,255,255,0.5);">
+                            <i class="fas fa-calendar"></i> All expire at: ${data.expiryFormatted}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            loadStats();
+            loadKeys();
+            
+        } else {
+            showToast(`❌ Failed: ${data.error}`, 'error');
         }
+        
+    } catch (err) {
+        console.error('Bulk keys error:', err);
+        showToast(`❌ Network error: ${err.message}`, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
 
         async function deleteKey(key) { if(confirm(`Delete key ${key}?`)){ showLoading(true); await fetch(`${BASE_API}/api/admin/delete-key`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, key}) }); loadKeys(); loadStats(); showLoading(false); } }
         async function deleteExpired() { if(confirm('Delete expired keys?')){ showLoading(true); await fetch(`${BASE_API}/api/admin/delete-expired-keys`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token}) }); loadKeys(); loadStats(); showLoading(false); } }
