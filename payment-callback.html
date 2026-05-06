@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Status - Nexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f, #0d1117);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        .container {
+            max-width: 500px;
+            margin: 20px;
+            padding: 40px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid rgba(255,0,0,0.3);
+            text-align: center;
+        }
+        .success-icon { font-size: 80px; color: #00ff88; margin-bottom: 20px; }
+        .error-icon { font-size: 80px; color: #ff0000; margin-bottom: 20px; }
+        .pending-icon { font-size: 80px; color: #ffaa33; margin-bottom: 20px; }
+        h2 { margin-bottom: 16px; }
+        p { color: rgba(255,255,255,0.7); margin-bottom: 24px; }
+        .btn {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,0,0,0.2);
+            border-top-color: #ff0000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container" id="paymentStatus">
+        <div class="loading-spinner"></div>
+        <p>Checking payment status...</p>
+    </div>
+
+    <script>
+        // Ambil parameter dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const transactionId = urlParams.get('reference') || urlParams.get('order_id');
+        const status = urlParams.get('status') || urlParams.get('transaction_status');
+        
+        const API_BASE = 'https://system-nexus-key.vercel.app';
+        
+        async function checkPaymentStatus() {
+            if (!transactionId) {
+                document.getElementById('paymentStatus').innerHTML = `
+                    <div class="error-icon">❌</div>
+                    <h2>Invalid Transaction</h2>
+                    <p>No transaction ID found.</p>
+                    <a href="/" class="btn">Back to Home</a>
+                `;
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/api/check-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transactionId })
+                });
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div class="success-icon">✅</div>
+                        <h2>Payment Successful!</h2>
+                        <p>Your coins have been added to your account.</p>
+                        <p><strong>+${data.coins} Coins</strong></p>
+                        <a href="/" class="btn">Go to Dashboard</a>
+                    `;
+                } else if (data.status === 'pending') {
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div class="pending-icon">⏳</div>
+                        <h2>Payment Pending</h2>
+                        <p>Your payment is being processed. Please check back later.</p>
+                        <a href="/" class="btn">Back to Home</a>
+                    `;
+                } else {
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div class="error-icon">❌</div>
+                        <h2>Payment Failed</h2>
+                        <p>Your payment was not completed. Please try again.</p>
+                        <a href="/" class="btn">Try Again</a>
+                    `;
+                }
+            } catch(err) {
+                document.getElementById('paymentStatus').innerHTML = `
+                    <div class="error-icon">❌</div>
+                    <h2>Error</h2>
+                    <p>Failed to check payment status.</p>
+                    <a href="/" class="btn">Back to Home</a>
+                `;
+            }
+        }
+        
+        // Jika sudah dapat status dari URL params, langsung tampilkan
+        if (status === 'success' || status === 'settlement') {
+            document.getElementById('paymentStatus').innerHTML = `
+                <div class="success-icon">✅</div>
+                <h2>Payment Successful!</h2>
+                <p>Thank you for your purchase.</p>
+                <a href="/" class="btn">Go to Dashboard</a>
+            `;
+        } else if (status === 'pending') {
+            document.getElementById('paymentStatus').innerHTML = `
+                <div class="pending-icon">⏳</div>
+                <h2>Payment Pending</h2>
+                <p>Please complete your payment.</p>
+                <a href="/" class="btn">Back to Home</a>
+            `;
+        } else if (status === 'failed' || status === 'expired') {
+            document.getElementById('paymentStatus').innerHTML = `
+                <div class="error-icon">❌</div>
+                <h2>Payment Failed</h2>
+                <p>Please try again.</p>
+                <a href="/" class="btn">Try Again</a>
+            `;
+        } else {
+            checkPaymentStatus();
+        }
+    </script>
+</body>
+</html>
